@@ -1,0 +1,25 @@
+storage:
+  type: sqlite
+  path: /data/data.db
+
+endpoints:
+  - name: Jellyfin
+    group: Media
+    url: "https://jellyfin.elvishlegion.com"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: Minecraft Server
+    group: Game Infrastructure
+    url: "icmp://minecraft.tail5859ca.ts.net"
+    interval: 60s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: Media VPS
+    group: Infrastructure
+    url: "icmp://media-vps.tail5859ca.ts.net"
+    interval: 60s
+    conditions:
+      - "[CONNECTED] == true"

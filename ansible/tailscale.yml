@@ -1,0 +1,29 @@
+---
+- name: Enroll utility server in Tailscale
+  hosts: vm-hmlb-util
+  become: true
+
+  tasks:
+    - name: Verify Tailscale auth key was supplied
+      ansible.builtin.assert:
+        that:
+          - lookup('env', 'TAILSCALE_AUTH_KEY') | length > 0
+        fail_msg: "TAILSCALE_AUTH_KEY is not set in the WSL environment."
+      no_log: true
+
+    - name: Check whether Tailscale is already connected
+      ansible.builtin.command:
+        cmd: tailscale ip -4
+      register: tailscale_ip
+      changed_when: false
+      failed_when: false
+
+    - name: Join Tailscale network
+      ansible.builtin.command:
+        argv:
+          - tailscale
+          - up
+          - "--auth-key={{ lookup('env', 'TAILSCALE_AUTH_KEY') }}"
+          - "--hostname=vm-hmlb-util"
+      when: tailscale_ip.rc != 0
+      no_log: true

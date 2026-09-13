@@ -1,0 +1,35 @@
+---
+- name: Deploy homelab monitoring stack
+  hosts: vm-hmlb-util
+  become: true
+
+  tasks:
+    - name: Create monitoring directory
+      ansible.builtin.file:
+        path: /opt/monitoring/gatus
+        state: directory
+        owner: elvish
+        group: elvish
+        mode: "0755"
+
+    - name: Copy Docker Compose configuration
+      ansible.builtin.copy:
+        src: files/monitoring/compose.yml
+        dest: /opt/monitoring/compose.yml
+        owner: elvish
+        group: elvish
+        mode: "0644"
+
+    - name: Copy Gatus configuration
+      ansible.builtin.copy:
+        src: files/monitoring/gatus/config.yaml
+        dest: /opt/monitoring/gatus/config.yaml
+        owner: elvish
+        group: elvish
+        mode: "0644"
+
+    - name: Start monitoring containers
+      community.docker.docker_compose_v2:
+        project_src: /opt/monitoring
+        state: present
+        pull: always
