@@ -35,9 +35,13 @@ write_files:
         "https://pkgs.tailscale.com/stable/ubuntu/$CODENAME.noarmor.gpg" \
         -o /usr/share/keyrings/tailscale-archive-keyring.gpg
 
+      chmod 0644 /usr/share/keyrings/tailscale-archive-keyring.gpg
+
       curl -fsSL \
         "https://pkgs.tailscale.com/stable/ubuntu/$CODENAME.tailscale-keyring.list" \
         -o /etc/apt/sources.list.d/tailscale.list
+
+      chmod 0644 /etc/apt/sources.list.d/tailscale.list
 
       apt-get update
       DEBIAN_FRONTEND=noninteractive apt-get install -y tailscale
