@@ -23,7 +23,7 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
-      - ./gatus/config.yaml:/config/config.yaml:ro
+      - ./gatus:/config:ro
       - gatus-data:/data
     logging: *default-logging
 
@@ -35,7 +35,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy:/etc/caddy:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:
