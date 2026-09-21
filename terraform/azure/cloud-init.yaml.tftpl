@@ -1,0 +1,79 @@
+#cloud-config
+package_update: true
+
+packages:
+  - ca-certificates
+  - curl
+  - jq
+
+write_files:
+  - path: /usr/local/sbin/bootstrap-tailscale.sh
+    owner: root:root
+    permissions: "0700"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      umask 077
+
+      CLIENT_ID="${bootstrap_identity_client_id}"
+      KV_NAME="${key_vault_name}"
+      TS_HOSTNAME="${tailscale_hostname}"
+      AUTH_FILE="/run/tailscale-authkey"
+
+      cleanup() {
+        rm -f "$AUTH_FILE"
+        unset TOKEN
+      }
+      trap cleanup EXIT
+
+      . /etc/os-release
+      CODENAME="$VERSION_CODENAME"
+
+      install -d -m 0755 /usr/share/keyrings
+
+      curl -fsSL \
+        "https://pkgs.tailscale.com/stable/ubuntu/$CODENAME.noarmor.gpg" \
+        -o /usr/share/keyrings/tailscale-archive-keyring.gpg
+
+      curl -fsSL \
+        "https://pkgs.tailscale.com/stable/ubuntu/$CODENAME.tailscale-keyring.list" \
+        -o /etc/apt/sources.list.d/tailscale.list
+
+      apt-get update
+      DEBIAN_FRONTEND=noninteractive apt-get install -y tailscale
+
+      systemctl enable --now tailscaled
+
+      TOKEN="$(
+        curl -fsS --noproxy "*" \
+          -H Metadata:true \
+          "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net&client_id=$CLIENT_ID" \
+          | jq -r '.access_token // empty'
+      )"
+
+      if [ -z "$TOKEN" ]; then
+        echo "Unable to obtain managed identity token" >&2
+        exit 1
+      fi
+
+      install -m 0600 /dev/null "$AUTH_FILE"
+
+      curl -fsS --config - \
+        "https://$KV_NAME.vault.azure.net/secrets/tailscale-auth-key?api-version=7.4" <<EOF \
+        | jq -r '.value // empty' > "$AUTH_FILE"
+      header = "Authorization: Bearer $TOKEN"
+      EOF
+
+      if [ ! -s "$AUTH_FILE" ]; then
+        echo "Unable to retrieve Tailscale auth key" >&2
+        exit 1
+      fi
+
+      tailscale up \
+        --auth-key="file:$AUTH_FILE" \
+        --hostname="$TS_HOSTNAME"
+
+      tailscale status --json >/dev/null
+
+runcmd:
+  - /usr/local/sbin/bootstrap-tailscale.sh
