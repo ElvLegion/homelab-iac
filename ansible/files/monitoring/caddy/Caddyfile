@@ -1,0 +1,10 @@
+{
+	servers :443 {
+		protocols h1 h2
+	}
+}
+
+status.elvishlegion.com {
+	header -Alt-Svc
+	reverse_proxy gatus:8080
+}
