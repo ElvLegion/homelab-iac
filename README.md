@@ -1,5 +1,7 @@
 # Homelab Infrastructure as Code
 
+[![Infrastructure CI](https://github.com/ElvLegion/homelab-iac/actions/workflows/ci.yml/badge.svg)](https://github.com/ElvLegion/homelab-iac/actions/workflows/ci.yml)
+
 Infrastructure-as-Code project for managing the Azure-based management and monitoring layer of a hybrid homelab.
 
 The project uses Terraform, cloud-init, Azure managed identities, Azure Key Vault, Tailscale, Ansible, Docker Compose, Caddy, Gatus, and Grafana.
