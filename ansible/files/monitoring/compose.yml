@@ -1,15 +1,22 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0
     container_name: grafana
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+    logging: *default-logging
 
   gatus:
-    image: twinproduction/gatus:latest
+    image: twinproduction/gatus@sha256:c6ee1cc45dcba6bd94f032d81c8e35fee15cf9e7766ef232ef8edf667d069b16
     container_name: gatus
     restart: unless-stopped
     ports:
@@ -17,21 +24,22 @@ services:
     volumes:
       - ./gatus/config.yaml:/config/config.yaml:ro
       - gatus-data:/data
+    logging: *default-logging
 
   caddy:
-    image: caddy:2
+    image: caddy@sha256:14a9c00d4e833ebc2b65d36515b37bde3b73f0b323a2663aaafc88953d8c4e3f
     container_name: caddy
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:
       - gatus
+    logging: *default-logging
 
 volumes:
   grafana-data:

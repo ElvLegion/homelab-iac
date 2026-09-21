@@ -52,7 +52,7 @@
       community.docker.docker_compose_v2:
         project_src: /opt/monitoring
         state: present
-        pull: always
+        pull: missing
 
     - name: Flush configuration handlers
       ansible.builtin.meta: flush_handlers
