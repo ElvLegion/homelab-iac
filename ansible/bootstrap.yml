@@ -49,7 +49,7 @@
     - name: Update apt cache after adding Docker repository
       ansible.builtin.apt:
         update_cache: true
-      when: docker_repository.changed
+      when: docker_repository.changed  # noqa: no-handler
 
     - name: Install Docker Engine and Compose
       ansible.builtin.apt:
@@ -95,7 +95,7 @@
     - name: Update apt cache after adding Tailscale repository
       ansible.builtin.apt:
         update_cache: true
-      when: tailscale_repository.changed
+      when: tailscale_repository.changed  # noqa: no-handler
 
     - name: Install Tailscale
       ansible.builtin.apt:
