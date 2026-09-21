@@ -32,7 +32,10 @@ resource "azurerm_linux_virtual_machine" "utility" {
   }
 
   identity {
-    type = "SystemAssigned"
+    type = "SystemAssigned, UserAssigned"
+    identity_ids = [
+      azurerm_user_assigned_identity.bootstrap.id
+    ]
   }
 
   tags = local.common_tags
