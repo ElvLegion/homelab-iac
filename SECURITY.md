@@ -89,6 +89,7 @@ The current environment has been tested with the following controls:
 - Ansible bootstrap is idempotent
 - `ansible-lint` passes the production profile
 - `yamllint` passes
+- GitHub Actions automatically runs Checkov, Terraform validation, `ansible-lint`, and `yamllint` on pull requests and pushes to `main`
 
 ## Future Improvements
 
@@ -98,4 +99,3 @@ Potential future security improvements include:
 - remote Terraform state in Azure Storage
 - GitHub Actions using Azure OIDC instead of stored credentials
 - Tailscale workload identity federation
-- automated Checkov, Terraform, Ansible, and YAML validation in CI
