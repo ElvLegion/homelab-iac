@@ -12,10 +12,17 @@ resource "azurerm_linux_virtual_machine" "utility" {
 
   disable_password_authentication = true
 
+  custom_data = base64encode(local.bootstrap_cloud_init)
+
+  secure_boot_enabled        = true
+  vtpm_enabled               = true
+  encryption_at_host_enabled = true
+
   admin_ssh_key {
     username   = "elvish"
-    public_key = file(pathexpand("~/.ssh/hmlb_azure.pub"))
+    public_key = var.admin_ssh_public_key
   }
+
 
   os_disk {
     name                 = "disk-hmlb-util-os"
@@ -28,7 +35,7 @@ resource "azurerm_linux_virtual_machine" "utility" {
     publisher = "Canonical"
     offer     = "ubuntu-26_04-lts"
     sku       = "server"
-    version   = "latest"
+    version   = "26.04.202609020"
   }
 
   identity {
@@ -37,6 +44,7 @@ resource "azurerm_linux_virtual_machine" "utility" {
       azurerm_user_assigned_identity.bootstrap.id
     ]
   }
+  boot_diagnostics {}
 
   tags = local.common_tags
 }
