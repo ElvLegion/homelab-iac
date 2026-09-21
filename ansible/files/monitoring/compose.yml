@@ -18,6 +18,23 @@ services:
       - ./gatus/config.yaml:/config/config.yaml:ro
       - gatus-data:/data
 
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - gatus
+
 volumes:
   grafana-data:
   gatus-data:
+  caddy-data:
+  caddy-config:

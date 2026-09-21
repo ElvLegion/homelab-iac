@@ -12,6 +12,14 @@
         group: elvish
         mode: "0755"
 
+    - name: Create Caddy directory
+      ansible.builtin.file:
+        path: /opt/monitoring/caddy
+        state: directory
+        owner: elvish
+        group: elvish
+        mode: "0755"
+
     - name: Copy Docker Compose configuration
       ansible.builtin.copy:
         src: files/monitoring/compose.yml
@@ -27,9 +35,22 @@
         owner: elvish
         group: elvish
         mode: "0644"
+      notify: Restart Gatus
+
+    - name: Copy Caddy configuration
+      ansible.builtin.copy:
+        src: files/monitoring/caddy/Caddyfile
+        dest: /opt/monitoring/caddy/Caddyfile
+        owner: elvish
+        group: elvish
+        mode: "0644"
 
     - name: Start monitoring containers
       community.docker.docker_compose_v2:
         project_src: /opt/monitoring
         state: present
         pull: always
+  handlers:
+    - name: Restart Gatus
+      ansible.builtin.command:
+        cmd: docker compose -f /opt/monitoring/compose.yml restart gatus

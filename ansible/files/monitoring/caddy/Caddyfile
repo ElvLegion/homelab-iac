@@ -1,0 +1,3 @@
+status.elvishlegion.com {
+    reverse_proxy gatus:8080
+}

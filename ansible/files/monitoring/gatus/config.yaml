@@ -23,3 +23,20 @@ endpoints:
     interval: 60s
     conditions:
       - "[CONNECTED] == true"
+
+  - name: MC Stats
+    group: Game Infrastructure
+    url: "https://mcstats.elvishlegion.com/healthz"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY].ok == true"
+      - "has([BODY].players) == true"
+      - "[RESPONSE_TIME] < 2000"
+      - "[CERTIFICATE_EXPIRATION] > 168h"
+  - name: Minecraft Game
+    group: Game Infrastructure
+    url: "tcp://minecraft.tail5859ca.ts.net:25565"
+    interval: 60s
+    conditions:
+      - "[CONNECTED] == true"
