@@ -18,6 +18,8 @@
           - jq
           - unzip
           - ufw
+          - python3-debian
+          - unattended-upgrades
         state: present
 
     - name: Create Docker keyring directory
@@ -37,15 +39,17 @@
         name: docker
         types: deb
         uris: https://download.docker.com/linux/ubuntu
-        suites: resolute
+        suites: "{{ ansible_facts['distribution_release'] }}"
         components: stable
         architectures: amd64
         signed_by: /etc/apt/keyrings/docker.asc
         state: present
+      register: docker_repository
 
     - name: Update apt cache after adding Docker repository
       ansible.builtin.apt:
         update_cache: true
+      when: docker_repository.changed
 
     - name: Install Docker Engine and Compose
       ansible.builtin.apt:
@@ -69,22 +73,50 @@
         groups: docker
         append: true
 
-    - name: Download Tailscale installer
-      ansible.builtin.get_url:
-        url: https://tailscale.com/install.sh
-        dest: /tmp/install-tailscale.sh
+    - name: Ensure Tailscale keyring directory exists
+      ansible.builtin.file:
+        path: /usr/share/keyrings
+        state: directory
         mode: "0755"
 
+    - name: Download Tailscale signing key
+      ansible.builtin.get_url:
+        url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_facts['distribution_release'] }}.noarmor.gpg"
+        dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+        mode: "0644"
+
+    - name: Configure Tailscale apt repository
+      ansible.builtin.get_url:
+        url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_facts['distribution_release'] }}.tailscale-keyring.list"
+        dest: /etc/apt/sources.list.d/tailscale.list
+        mode: "0644"
+      register: tailscale_repository
+
+    - name: Update apt cache after adding Tailscale repository
+      ansible.builtin.apt:
+        update_cache: true
+      when: tailscale_repository.changed
+
     - name: Install Tailscale
-      ansible.builtin.command:
-        cmd: /tmp/install-tailscale.sh
-        creates: /usr/bin/tailscale
+      ansible.builtin.apt:
+        name: tailscale
+        state: present
 
     - name: Enable and start Tailscale
       ansible.builtin.systemd:
         name: tailscaled
         enabled: true
         state: started
+
+    - name: Enable automatic security updates
+      ansible.builtin.copy:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Unattended-Upgrade "1";
 
     - name: Set UFW default incoming policy
       community.general.ufw:
@@ -96,11 +128,6 @@
         direction: outgoing
         policy: allow
 
-    #- name: Allow SSH
-     # community.general.ufw:
-      #  rule: allow
-       # port: "22"
-        #proto: tcp
     - name: Allow SSH over Tailscale
       community.general.ufw:
         rule: allow
