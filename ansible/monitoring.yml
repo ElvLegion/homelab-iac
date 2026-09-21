@@ -44,13 +44,49 @@
         owner: elvish
         group: elvish
         mode: "0644"
+      notify:
+        - Validate Caddy configuration
+        - Reload Caddy
 
     - name: Start monitoring containers
       community.docker.docker_compose_v2:
         project_src: /opt/monitoring
         state: present
         pull: always
+
+    - name: Flush configuration handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Verify Gatus health
+      ansible.builtin.uri:
+        url: http://127.0.0.1:8080/health
+        status_code: 200
+        return_content: true
+      register: gatus_health
+      retries: 5
+      delay: 3
+      until: gatus_health.status == 200
+
+    - name: Verify Grafana health
+      ansible.builtin.uri:
+        url: http://127.0.0.1:3000/api/health
+        status_code: 200
+        return_content: true
+      register: grafana_health
+      retries: 5
+      delay: 3
+      until: grafana_health.status == 200
+
   handlers:
     - name: Restart Gatus
       ansible.builtin.command:
         cmd: docker compose -f /opt/monitoring/compose.yml restart gatus
+
+    - name: Validate Caddy configuration
+      ansible.builtin.command:
+        cmd: docker exec caddy caddy validate --config /etc/caddy/Caddyfile
+      changed_when: false
+
+    - name: Reload Caddy
+      ansible.builtin.command:
+        cmd: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
