@@ -15,6 +15,9 @@ endpoints:
     group: Game Infrastructure
     url: "icmp://minecraft.tail5859ca.ts.net"
     interval: 60s
+    ui:
+      hide-hostname: true
+      hide-conditions: true
     conditions:
       - "[CONNECTED] == true"
 
@@ -22,6 +25,9 @@ endpoints:
     group: Infrastructure
     url: "icmp://media-vps.tail5859ca.ts.net"
     interval: 60s
+    ui:
+      hide-hostname: true
+      hide-conditions: true
     conditions:
       - "[CONNECTED] == true"
 
@@ -29,15 +35,22 @@ endpoints:
     group: Game Infrastructure
     url: "https://mcstats.elvishlegion.com/healthz"
     interval: 60s
+    ui:
+      hide-conditions: true
     conditions:
       - "[STATUS] == 200"
       - "[BODY].ok == true"
       - "has([BODY].players) == true"
       - "[RESPONSE_TIME] < 2000"
       - "[CERTIFICATE_EXPIRATION] > 168h"
+
   - name: Minecraft Game
     group: Game Infrastructure
     url: "tcp://minecraft.tail5859ca.ts.net:25565"
     interval: 60s
+    ui:
+      hide-hostname: true
+      hide-port: true
+      hide-conditions: true
     conditions:
       - "[CONNECTED] == true"
