@@ -395,6 +395,9 @@ Action Group notification
 
 Grafana queries the same Log Analytics data to provide a visual security-operations view of the environment.
 
+For implementation details, KQL queries, alert logic, and validation steps, see
+[Hybrid Security Monitoring](docs/security-monitoring.md).
+
 ## Container Hardening
 
 Monitoring container images are pinned by immutable image digest.
