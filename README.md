@@ -120,6 +120,11 @@ homelab-iac/
 │           └── gatus/
 │               └── config.yaml
 │
+├── docs/
+│   └── images/
+│       ├── grafana-security-dashboard.png
+│       └── gatus-status-page.png
+│
 ├── terraform/
 │   └── azure/
 │       ├── bootstrap-secrets.tf
@@ -287,6 +292,8 @@ Gatus performs availability checks for services including:
 - Jellyfin
 - Minecraft infrastructure
 - Media VPS infrastructure
+- Minecraft game availability
+- Homelab status services
 
 The public status page is available at:
 
@@ -295,6 +302,8 @@ https://status.elvishlegion.com
 ```
 
 Gatus itself remains bound to the loopback interface and is exposed publicly through Caddy.
+
+![Gatus health dashboard](docs/images/gatus-status-page.png)
 
 ### Grafana
 
@@ -324,6 +333,8 @@ The security dashboard currently visualizes:
 - successful SSH logins
 - sudo activity
 - recent authentication and security events
+
+![Grafana security dashboard](docs/images/grafana-security-dashboard.png)
 
 ## Security Monitoring and Detection
 
